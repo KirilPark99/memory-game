@@ -9,6 +9,8 @@ const pictures = [
   { name: 'Дерево', file: 'tree.svg' },
 ];
 
+const storageKey = 'memory-game-results';
+
 let firstCard = null;
 let secondCard = null;
 let moves = 0;
@@ -109,14 +111,94 @@ modal.addEventListener('close', () => {
   }
 });
 
-function showVictory() {
+function readResults() {
+  try {
+    const results = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    if (!Array.isArray(results)) {
+      return [];
+    }
+
+    return results.filter((result) => result
+      && Number.isInteger(result.moves)
+      && result.moves >= 8
+      && Number.isFinite(result.date)
+      && result.date > 0
+      && !Number.isNaN(new Date(result.date).getTime()));
+  } catch {
+    return [];
+  }
+}
+
+function sortResults(results) {
+  return results.sort((a, b) => a.moves - b.moves || a.date - b.date).slice(0, 10);
+}
+
+function saveResult() {
+  const results = readResults();
+  results.push({ moves, date: Date.now() });
+
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(sortResults(results)));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function formatDate(timestamp) {
+  const date = new Date(timestamp);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${day}.${month}.${date.getFullYear()}`;
+}
+
+function showVictory(isSaved) {
+  const content = createElement('div');
   const message = createElement('p', '', `Вы нашли все 8 пар! Количество ходов: ${moves}.`);
-  openModal('Победа!', message, true);
+  content.append(message);
+
+  if (!isSaved) {
+    content.append(createElement('p', '', 'Не удалось сохранить результат. Проверьте, разрешено ли хранение данных в браузере.'));
+  }
+
+  openModal('Победа!', content, true);
 }
 
 function showLeaders() {
-  const message = createElement('p', '', 'Пока нет результатов. Завершите игру!');
-  openModal('Таблица лидеров', message, false);
+  const results = sortResults(readResults());
+
+  if (results.length === 0) {
+    const message = createElement('p', '', 'Пока нет результатов. Завершите игру!');
+    openModal('Таблица лидеров', message, false);
+    return;
+  }
+
+  const table = createElement('table');
+  const tableHead = createElement('thead');
+  const headRow = createElement('tr');
+  const tableBody = createElement('tbody');
+
+  ['Место', 'Ходы', 'Дата'].forEach((text) => {
+    const cell = createElement('th', '', text);
+    cell.scope = 'col';
+    headRow.append(cell);
+  });
+
+  tableHead.append(headRow);
+
+  results.forEach((result, index) => {
+    const row = createElement('tr');
+    row.append(
+      createElement('td', '', String(index + 1)),
+      createElement('td', '', String(result.moves)),
+      createElement('td', '', formatDate(result.date)),
+    );
+    tableBody.append(row);
+  });
+
+  table.append(tableHead, tableBody);
+  openModal('Таблица лидеров', table, false);
 }
 
 function createCard(picture, index) {
@@ -209,7 +291,8 @@ function openCard(card) {
 
     if (pairs === 8) {
       isFinished = true;
-      showVictory();
+      const isSaved = saveResult();
+      showVictory(isSaved);
     }
   } else {
     isLocked = true;

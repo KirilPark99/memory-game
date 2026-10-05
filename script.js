@@ -57,6 +57,68 @@ counters.append(movesText, pairsText);
 game.append(header, counters, board, instructions);
 document.body.append(game);
 
+const modal = createElement('dialog', 'modal');
+const modalTitle = createElement('h2');
+const modalContent = createElement('div');
+const modalButtons = createElement('div', 'modal-buttons');
+modalTitle.id = 'modal-title';
+modal.setAttribute('aria-labelledby', modalTitle.id);
+modal.append(modalTitle, modalContent, modalButtons);
+document.body.append(modal);
+
+function closeModal() {
+  modal.close();
+  document.body.classList.remove('modal-open');
+}
+
+function openModal(title, content, canRestart) {
+  modalTitle.textContent = title;
+  modalContent.replaceChildren(content);
+  modalButtons.replaceChildren();
+
+  if (canRestart) {
+    const restartButton = createElement('button', '', 'Новая игра');
+    restartButton.type = 'button';
+    restartButton.addEventListener('click', startNewGame);
+    modalButtons.append(restartButton);
+  }
+
+  const closeButton = createElement('button', '', 'Закрыть');
+  closeButton.type = 'button';
+  closeButton.addEventListener('click', closeModal);
+  modalButtons.append(closeButton);
+  modal.showModal();
+  document.body.classList.add('modal-open');
+}
+
+modal.addEventListener('click', (event) => {
+  const rectangle = modal.getBoundingClientRect();
+  const outside = event.clientX < rectangle.left
+    || event.clientX > rectangle.right
+    || event.clientY < rectangle.top
+    || event.clientY > rectangle.bottom;
+
+  if (event.target === modal && outside) {
+    closeModal();
+  }
+});
+
+modal.addEventListener('close', () => {
+  if (!modal.open) {
+    document.body.classList.remove('modal-open');
+  }
+});
+
+function showVictory() {
+  const message = createElement('p', '', `Вы нашли все 8 пар! Количество ходов: ${moves}.`);
+  openModal('Победа!', message, true);
+}
+
+function showLeaders() {
+  const message = createElement('p', '', 'Пока нет результатов. Завершите игру!');
+  openModal('Таблица лидеров', message, false);
+}
+
 function createCard(picture, index) {
   const card = createElement('button', 'card');
   const back = createElement('span', '', '?');
@@ -93,6 +155,10 @@ function updateCounters() {
 }
 
 function startNewGame() {
+  if (modal.open) {
+    closeModal();
+  }
+
   clearTimeout(closeTimer);
   closeTimer = null;
   firstCard = null;
@@ -117,7 +183,7 @@ function closeCard(card) {
 }
 
 function openCard(card) {
-  if (isLocked || isFinished || card.classList.contains('open')) {
+  if (modal.open || isLocked || isFinished || card.classList.contains('open')) {
     return;
   }
 
@@ -143,6 +209,7 @@ function openCard(card) {
 
     if (pairs === 8) {
       isFinished = true;
+      showVictory();
     }
   } else {
     isLocked = true;
@@ -159,4 +226,5 @@ function openCard(card) {
 }
 
 newGameButton.addEventListener('click', startNewGame);
+leadersButton.addEventListener('click', showLeaders);
 startNewGame();

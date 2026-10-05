@@ -1,0 +1,174 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px 12px;
+  background: #f2f2f2;
+  color: #222;
+  font-family: Arial, sans-serif;
+}
+
+.game {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  margin: 8px 0 20px;
+  font-size: 30px;
+}
+
+button {
+  padding: 9px 14px;
+  border: 1px solid #777;
+  border-radius: 4px;
+  background: #e5e5e5;
+  color: #222;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #d6d6d6;
+}
+
+button:focus-visible {
+  outline: 3px solid #234e91;
+  outline-offset: 3px;
+}
+
+.controls,
+.counters,
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.counters {
+  margin: 20px 0;
+  gap: 24px;
+}
+
+.counters p {
+  margin: 0;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 10px;
+  border: 2px solid #5b7191;
+  background: #738bad;
+  color: white;
+  font-size: 32px;
+}
+
+.card:hover {
+  background: #617c9f;
+}
+
+.card img {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.card.open,
+.card.matched {
+  background: white;
+  cursor: default;
+}
+
+.card.open img,
+.card.matched img {
+  display: block;
+}
+
+.card.open span,
+.card.matched span {
+  display: none;
+}
+
+.card.matched {
+  border-color: #50864b;
+  background: #edf6ec;
+}
+
+.instructions {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.modal {
+  width: min(400px, calc(100% - 24px));
+  max-height: calc(100dvh - 40px);
+  padding: 24px;
+  overflow-y: auto;
+  border: 1px solid #777;
+  border-radius: 4px;
+  background: white;
+  color: #222;
+  text-align: center;
+}
+
+.modal::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+.modal h2 {
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th,
+td {
+  padding: 8px 4px;
+  border: 1px solid #aaa;
+}
+
+th {
+  background: #eee;
+}
+
+@media (max-width: 360px) {
+  .board {
+    gap: 6px;
+  }
+
+  .card {
+    padding: 6px;
+  }
+
+  .modal {
+    padding: 16px;
+  }
+}
